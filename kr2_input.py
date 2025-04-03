@@ -1,7 +1,4 @@
 import numpy as np
-# Создаем русский алфавит с пробелом
-
-
 # (1)
 def gcd(a, b):
     if b == 0:
@@ -288,44 +285,57 @@ def hill_decrypt(ciphertext, matrix_str, mod=34):
     plaintext = ''.join(num_to_char(n) for n in plain_nums)
     return plaintext
 
-# Пример вызова функции
 def main():
-    print("\n##############_1_##############")
-    gcd(2784, 246)
-    print("\n##############_2_##############")
-    extended_gcd_pretty(2784, 246)
-    print("\n##############_3_##############")
-# Находим обратный элемент к 357 по модулю 451
-    find_inverse(357, 451)
-    # Пример 1
-    print("\n##############_4_##############")
-    print("Пример 1:")
-    matrix_inverse_mod("13 5 9 11 9 11 7 6 13 18 10 5 7 3 10 15")
+    while True:
+        print("\n" + "="*40)
+        print("Выберите задание:")
+        print("1. Нахождение НОД двух чисел")
+        print("2. Расширенный алгоритм Евклида")
+        print("3. Обратный элемент в кольце вычетов")
+        print("4. Обратная матрица по модулю")
+        print("5. Шифрование Хилла")
+        print("6. Дешифрование Хилла")
+        print("0. Выход")
+        choice = input("Ваш выбор (0-6): ")
 
-    # Пример 2
-    print("\nПример 2:")
-    matrix_inverse_mod("17 1 5 2 18 21 32 0 34 2 10 4 5 19 11 10")
+        if choice == "0":
+            print("Выход из программы.")
+            break
+            
+        elif choice == "1":
+            a = int(input("Первое число: "))
+            b = int(input("Второе число: "))
+            gcd(a, b)
+            
+        elif choice == "2":
+            a = int(input("Первое число: "))
+            b = int(input("Второе число: "))
+            extended_gcd_pretty(a, b)
+            
+        elif choice == "3":
+            num = int(input("Число: "))
+            mod = int(input("Модуль: "))
+            find_inverse(num, mod)
+            
+        elif choice == "4":
+            print("Введите матрицу в формате: 13 5 9 11 9 11 7 6 13 18 10 5 7 3 10 15")
+            matrix_str = input("Матрица: ")
+            matrix_inverse_mod(matrix_str)
+            
+        elif choice == "5":
+            print("Введите матрицу в формате: 13 5 9 11 9 11 7 6 13 18 10 5 7 3 10 15")
+            A = input("A = ")
+            message = input("Открытый текст: ")
+            hill_cipher(message, A)
+            
+        elif choice == "6":
+            print("Введите матрицу в формате: 13 5 9 11 9 11 7 6 13 18 10 5 7 3 10 15")
+            A = input("A = ")
+            ciphertext = input("Шифр текст: ")
+            hill_decrypt(ciphertext, A)
+            
+        else:
+            print("Неверный выбор! Попробуйте снова.")
 
-    print("\n##############_5_##############")
-    # Пример использования
-    A = "5 6 3 1 14 2 3 11 13 4 26 5 6 7 8 9"
-    message = "тестовый вариант"
-
-    print("Пример 1:")
-    hill_cipher(message, A)
-
-    # Дополнительный пример
-    A_example = "1 2 3 4 5 1 7 8 13 1 4 1 10 1 1 0"
-    message_example = "шифр хилла"
-
-    print("\nПример 2:")
-    hill_cipher(message_example, A_example)
-    
-    
-    print("\n##############_6_##############")
-    A = "6 24 1 13 16 10 20 17 15"
-    ciphertext = "фъооию"
-    plaintext = hill_decrypt(ciphertext, A)
-    print(f"\nРасшифрованный текст: {plaintext}")
 if __name__ == "__main__":
     main()
