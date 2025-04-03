@@ -327,5 +327,10 @@ def main():
     ciphertext = "фъооию"
     plaintext = hill_decrypt(ciphertext, A)
     print(f"\nРасшифрованный текст: {plaintext}")
+    
+    A = "5 6 3 1 14 2 3 11 13 4 26 5 6 7 8 9"
+    ciphertext = "ЫЬНХКАЬЙЧЖЛШДГЯЮ"
+    plaintext = hill_decrypt(ciphertext, A)
+    print(f"\nРасшифрованный текст: {plaintext}")
 if __name__ == "__main__":
     main()
