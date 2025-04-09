@@ -93,76 +93,38 @@ def find_inverse(a, modulus):
     # Выводим результат
     print(f"\nОбратный элемент к {a} по модулю {modulus}: {inverse}")
     return inverse
+
 # (4)
-def extended_gcd(a, b):
-    if b == 0:
-        return (a, 1, 0)
-    else:
-        g, x, y = extended_gcd(b, a % b)
-        return (g, y, x - (a // b) * y)
-
-def mod_inv(a, mod):
-    g, x, y = extended_gcd(a, mod)
-    if g != 1:
-        return None
-    return x % mod
-
-def matrix_inverse_mod(matrix_str, mod=34):
+def matrix_check_invertibility(matrix_str, mod=34):
     elements = list(map(int, matrix_str.split()))
-    n = int(len(elements)**0.5)
-    
-    if n*n != len(elements):
-        print("Ошибка: Некорректный размер матрицы")
+    n = int(len(elements) ** 0.5)
+
+    if n * n != len(elements):
+        print("Ошибка: Размерность матрицы не является квадратом.")
         return
-    
+
     A = np.array(elements).reshape(n, n)
     print("Исходная матрица:")
     print(A)
-    
-    # Вычисление определителя
+
     det = int(round(np.linalg.det(A))) % mod
-    print(f"\nШаг 1: Определитель = {det} (mod {mod})")
-    
+    print(f"\nОпределитель det(A) = {det} (mod {mod})")
+
     if det == 0:
-        print("Матрица вырождена")
+        print("Матрица вырождена (det = 0) => обратной не существует.")
         return
-    
-    # Поиск обратного к определителю
-    det_inv = mod_inv(det, mod)
-    if det_inv is None:
-        print(f"Нет обратного для {det} mod {mod}")
-        return
-    print(f"Шаг 2: Обратный к определителю = {det_inv}")
-    
-    # Матрица алгебраических дополнений
-    def cofactor(m):
-        minors = np.zeros_like(m)
-        for i in range(n):
-            for j in range(n):
-                minor = np.delete(np.delete(m, i, 0), j, 1)
-                minors[i][j] = (-1)**(i+j) * int(round(np.linalg.det(minor)))
-        return minors
-    
-    C = cofactor(A)
-    print("\nШаг 3: Матрица алгебраических дополнений:")
-    print(C)
-    
-    # Транспонирование и умножение на обратный определитель
-    adjugate = C.T
-    inv = (adjugate * det_inv) % mod
-    inv = np.where(inv < 0, inv + mod, inv)
-    
-    print("\nРезультат: Обратная матрица")
-    print(inv)
-    return inv
+
+    print("\nПроверка взаимной простоты det и mod:")
+    find_inverse(det, mod)
 
 # (5) 
 def hill_cipher(text, matrix_str, mod=34):
     russian_alphabet = [
-    'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й',
-    'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф',
-    'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я', ' '
-]
+        'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й',
+        'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф',
+        'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я', ' '
+    ]
+
     def char_to_num(c):
         c = c.upper()
         if c == 'Ё':
@@ -174,47 +136,48 @@ def hill_cipher(text, matrix_str, mod=34):
 
     def num_to_char(n):
         return russian_alphabet[n]
+
     # Парсинг матрицы
     matrix = list(map(int, matrix_str.split()))
     matrix_size = int(len(matrix)**0.5)
-    
+
     # Проверка на квадратную матрицу
     if matrix_size * matrix_size != len(matrix):
         print("Ошибка: Матрица не квадратная")
         return
-    
-    print(f"A = {[matrix[i*matrix_size:(i+1)*matrix_size] for i in range(matrix_size)]}\n")
-    
+
+    matrix_2d = [matrix[i * matrix_size:(i + 1) * matrix_size] for i in range(matrix_size)]
+    print(f"A = {matrix_2d}\n")
+
     # Преобразование текста в числовой формат
     try:
         numeric = [char_to_num(c) for c in text.upper()]
     except ValueError as e:
         print(e)
         return
-    
+
     # Дополнение пробелами
     padding = (-len(numeric)) % matrix_size
-    numeric += [33] * padding
-    
+    numeric += [33] * padding  # код символа ' '
+
     # Разбиение на блоки
-    blocks = [numeric[i:i+matrix_size] for i in range(0, len(numeric), matrix_size)]
-    
+    blocks = [numeric[i:i + matrix_size] for i in range(0, len(numeric), matrix_size)]
+
     # Шифрование блоков
     encrypted = []
     for i, block in enumerate(blocks):
-        print(f"a{i+1} = {block}")
-        
-        # Умножение матрицы на вектор
+        print(f"e{i+1} = {block}")
+
         cipher_block = []
-        for row in range(matrix_size):
+        for col in range(matrix_size):  # Проходим по столбцам матрицы
             total = 0
-            for col in range(matrix_size):
-                total += matrix[row*matrix_size + col] * block[col]
+            for row in range(matrix_size):  # Умножаем вектор-строку на столбец
+                total += block[row] * matrix_2d[row][col]
             cipher_block.append(total % mod)
-        
+
         print(f"c{i+1} = {cipher_block}\n")
         encrypted.extend(cipher_block)
-    
+
     # Преобразование в текст
     ciphertext = ''.join(num_to_char(n) for n in encrypted)
     print(f"Зашифрованный текст: {ciphertext}")
@@ -223,10 +186,10 @@ def hill_cipher(text, matrix_str, mod=34):
 # (6)
 def hill_decrypt(ciphertext, matrix_str, mod=34):
     russian_alphabet = [
-    'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й',
-    'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф',
-    'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я', ' '
-]
+        'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й',
+        'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф',
+        'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я', ' '
+    ]
 
     def char_to_num(c):
         c = c.upper()
@@ -236,7 +199,7 @@ def hill_decrypt(ciphertext, matrix_str, mod=34):
             raise ValueError(f"Символ '{c}' не найден в алфавите")
 
     def num_to_char(n):
-        return russian_alphabet[n % 34]
+        return russian_alphabet[n % mod]
 
     def mod_inv(a, mod):
         g, x, y = extended_gcd(a, mod)
@@ -255,34 +218,46 @@ def hill_decrypt(ciphertext, matrix_str, mod=34):
         n = len(matrix)
         det = int(round(np.linalg.det(matrix))) % mod
         det_inv = mod_inv(det, mod)
-        
+        if det_inv is None:
+            raise ValueError("Обратной матрицы не существует (определитель и модуль не взаимно простые)")
+
         minors = np.zeros((n, n), dtype=int)
         for i in range(n):
             for j in range(n):
                 minor = np.delete(np.delete(matrix, i, 0), j, 1)
                 minors[i][j] = (-1)**(i+j) * int(round(np.linalg.det(minor))) % mod
-        
+
         adjugate = minors.T
         inv = (adjugate * det_inv) % mod
         return np.where(inv < 0, inv + mod, inv)
+
+    # Парсинг матрицы и вычисление обратной
     matrix = list(map(int, matrix_str.split()))
     size = int(len(matrix)**0.5)
     matrix = np.array(matrix).reshape(size, size)
-    
+
     inv_matrix = matrix_inverse_mod(matrix, mod)
     print("Обратная матрица A^{-1}:")
-    print(inv_matrix)
-    
+    print(inv_matrix, '\n')
+
+    # Преобразование шифртекста в числовой формат
     cipher_nums = [char_to_num(c) for c in ciphertext]
-    blocks = [cipher_nums[i:i+size] for i in range(0, len(cipher_nums), size)]
-    
+
+    # Разбиение на блоки
+    blocks = [cipher_nums[i:i + size] for i in range(0, len(cipher_nums), size)]
+
+    # Расшифровка блоков
     plain_nums = []
-    for block in blocks:
-        decrypted = (inv_matrix @ np.array(block)) % mod
+    for i, block in enumerate(blocks):
+        print(f"c{i+1} = {block}")
+        row_vector = np.array(block)
+        decrypted = (row_vector @ inv_matrix) % mod  # Вектор-строка * обратная матрица
+        print(f"e{i+1} = {decrypted}\n")
         plain_nums.extend(decrypted)
-        print(f"Вектор {block} -> {decrypted}")
-    
-    plaintext = ''.join(num_to_char(n) for n in plain_nums)
+
+    # Преобразование в текст
+    plaintext = ''.join(num_to_char(int(n)) for n in plain_nums)
+    print(f"Расшифрованный текст: {plaintext}")
     return plaintext
 
 def main():
@@ -320,7 +295,7 @@ def main():
         elif choice == "4":
             print("Введите матрицу в формате: 13 5 9 11 9 11 7 6 13 18 10 5 7 3 10 15")
             matrix_str = input("Матрица: ")
-            matrix_inverse_mod(matrix_str)
+            matrix_check_invertibility(matrix_str, mod=34)
             
         elif choice == "5":
             print("Введите матрицу в формате: 13 5 9 11 9 11 7 6 13 18 10 5 7 3 10 15")
