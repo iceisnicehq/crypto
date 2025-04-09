@@ -7,7 +7,7 @@ def gcd(a, b):
     else:
         q = a // b
         r = a % b
-        print(f"{a} / {b} = {q} ост {r}")
+        print(f"{a} = {b}*{q} + {r}")
         return gcd(b, r)
 
 # (2)
