@@ -1,6 +1,8 @@
 import numpy as np
 # (1)
 def gcd(a, b):
+    if a < b:
+        a, b = b, a
     if b == 0:
         print(f"НОД равен {a}")
         return a
@@ -12,69 +14,67 @@ def gcd(a, b):
 
 # (2)
 def print_row(q, r, s, t, col_width=10):
-    print(f"{q:^{col_width}}│ {r:^{col_width}}│ {s:^{col_width}}│ {t:^{col_width}}")
+    print(f"{str(q):^{col_width}}│ {str(r):^{col_width}}│ {str(s):^{col_width}}│ {str(t):^{col_width}}")
 
 def extended_gcd_pretty(a, b):
+    # Автоматическая корректировка порядка, чтобы a ≥ b
+    swapped = False
+    if a < b:
+        a, b = b, a
+        swapped = True
+
     # Инициализация списков
     r = [a, b]
     s = [1, 0]
     t = [0, 1]
-    q = []
     steps = []
-    
-    # Выполняем шаги алгоритма
-    while True:
-        current_b = r[-1]
-        if current_b == 0:
-            break
-        q_i = r[-2] // current_b
-        r_i = r[-2] % current_b
-        
-        # Вычисляем новые коэффициенты s и t
-        s_i = s[-2] - s[-1] * q_i
-        t_i = t[-2] - t[-1] * q_i
-        
-        # Сохраняем шаг
+
+    # Выполнение алгоритма
+    while r[-1] != 0:
+        q_i = r[-2] // r[-1]
+        r_i = r[-2] % r[-1]
+        s_i = s[-2] - q_i * s[-1]
+        t_i = t[-2] - q_i * t[-1]
+
         steps.append({
             "q": q_i,
             "r": r_i,
             "s": s_i,
             "t": t_i
         })
-        
-        # Добавляем новые значения в списки
-        q.append(q_i)
+
         r.append(r_i)
         s.append(s_i)
         t.append(t_i)
-    
+
     # Форматирование таблицы
     col_width = 12
     header = f"{'q_i':^{col_width}}│ {'r_i':^{col_width}}│ {'s_i':^{col_width}}│ {'t_i':^{col_width}}"
     separator = "─" * col_width + "┼" + "─" * (col_width + 1) + "┼" + "─" * (col_width + 1) + "┼" + "─" * col_width
-    
+
     print(header)
     print(separator)
-    
-    # Первые две строки
+
     print_row("-", r[0], s[0], t[0], col_width)
     print_row("-", r[1], s[1], t[1], col_width)
     print(separator)
-    
-    # Последующие строки
-    for i, step in enumerate(steps):
-        r_val = step['r']
-        s_val = step['s'] if r_val != 0 else "-"
-        t_val = step['t'] if r_val != 0 else "-"
-        print_row(step['q'], step['r'], s_val, t_val, col_width)
+
+    for step in steps:
+        r_val = step["r"]
+        s_val = step["s"] if r_val != 0 else "-"
+        t_val = step["t"] if r_val != 0 else "-"
+        print_row(step["q"], r_val, s_val, t_val, col_width)
         print(separator)
-    
-    # Получаем НОД и коэффициенты
+
+    # НОД и коэффициенты
     gcd = r[-2]
     s_final = s[-2]
     t_final = t[-2]
-    
-    # Форматируем ответ
+
+    # Если изначально было поменяно местами — поправим коэффициенты
+    if swapped:
+        s_final, t_final = t_final, s_final
+
     print(f"\nОтвет: {a} * ({s_final}) + {b} * ({t_final}) = {gcd}")
     return gcd, s_final, t_final
 # (3)
@@ -290,6 +290,7 @@ def main():
         elif choice == "3":
             num = int(input("Число: "))
             mod = int(input("Модуль: "))
+            gcd(num, mod)
             find_inverse(num, mod)
             
         elif choice == "4":
